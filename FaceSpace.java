@@ -9,9 +9,9 @@ import java.util.Locale;
 import java.util.Scanner;
 //import oracle.jdbc.*;
 public class FaceSpace {
-    static int NEW_USER_ID = 0;
-    static int NEW_GROUP_ID = 0;
-    static int NEW_MSG_ID = 0;
+    static int NEW_USER_ID = 200;
+    static int NEW_GROUP_ID = 50;
+    static int NEW_MSG_ID = 500;
 	private Connection con;
 	public FaceSpace(Connection con){
 		this.con = con;
@@ -80,19 +80,13 @@ public class FaceSpace {
                     break;
                 case 2:
                     String ff;
-                    String lf;
                     String fl;
-                    String ll;
-                    System.out.println("Enter a the first name of user a");
+                    System.out.println("Enter a the name of user a");
                     ff = scan.nextLine();
-                    System.out.println("Enter a the last name of user a");
-                    lf = scan.nextLine();
-                    System.out.println("Enter a the first name of user b");
+                    System.out.println("Enter a the name of user b");
                     fl = scan.nextLine();
-                    System.out.println("Enter a the last name of user b");
-                    ll = scan.nextLine();
 
-                    error = initiateFriendship(findId(ff,lf,con),findId(fl,ll,con),con);
+                    error = initiateFriendship(findId(ff,con),findId(fl,con),con);
 
                     if(error!=0){
                         System.out.println("Error Initiating Friendship");
@@ -103,19 +97,13 @@ public class FaceSpace {
                     break;
                 case 3:
                     String ffa;
-                    String lfa;
                     String fla;
-                    String lla;
-                    System.out.println("Enter a the first name of user a");
+                    System.out.println("Enter a the name of user a");
                     ffa = scan.nextLine();
-                    System.out.println("Enter a the last name of user a");
-                    lfa = scan.nextLine();
-                    System.out.println("Enter a the first name of user b");
+                    System.out.println("Enter a the name of user b");
                     fla = scan.nextLine();
-                    System.out.println("Enter a the last name of user b");
-                    lla = scan.nextLine();
 
-                    error = establishFriendship(findId(ffa,lfa,con),findId(fla,lla,con),con);
+                    error = establishFriendship(findId(ffa,con),findId(fla,con),con);
 
                     if(error!=0){
                         System.out.println("Error Establishing Friendship");
@@ -127,12 +115,9 @@ public class FaceSpace {
                 case 4:
                     int[] ar;
                     String qw;
-                    String er;
-                    System.out.println("Enter a the first name of the user");
+                    System.out.println("Enter a the name of the user");
                     qw = scan.nextLine();
-                    System.out.println("Enter a the last name of the user");
-                    er = scan.nextLine();
-                    ar = displayFriends(findId(qw,er,con),con);
+                    ar = displayFriends(findId(qw,con),con);
                     for(int i=0; i<ar.length;i++){
                         System.out.println(findName(ar[i],con));
                     }
@@ -159,15 +144,12 @@ public class FaceSpace {
                     break;
                 case 6:
                     String o;
-                    String p;
                     String u;
                     int use = 0;
                     int grp = 0;
-                    System.out.println("Enter a the first name of the user");
+                    System.out.println("Enter a the name of the user");
                     o = scan.nextLine();
-                    System.out.println("Enter a the last name of the user");
-                    p = scan.nextLine();
-                    use = findId(o,p,con);
+                    use = findId(o,con);
                     System.out.println("Enter a the name of the group");
                     u = scan.nextLine();
                     grp = findGId(u,con);
@@ -182,23 +164,18 @@ public class FaceSpace {
                     break;
                 case 7:
                     String oq;
-                    String pq;
+                    
                     String uq;
-                    String yq;
                     String sub;
                     String bod;
                     int useq = 0;
                     int usew = 0;
-                    System.out.println("Enter a the first name of the receiver");
+                    System.out.println("Enter a the name of the receiver");
                     oq = scan.nextLine();
-                    System.out.println("Enter a the last name of the receiver");
-                    pq = scan.nextLine();
-                    System.out.println("Enter a the first name of the sender");
+                    System.out.println("Enter a the name of the sender");
                     uq = scan.nextLine();
-                    System.out.println("Enter a the last name of the sender");
-                    yq = scan.nextLine();
-                    useq = findId(oq,pq,con);
-                    usew = findId(uq,yq,con);
+                    useq = findId(oq,con);
+                    usew = findId(uq,con);
                     System.out.println("Enter a the subject of the message");
                     sub = scan.nextLine();
                     System.out.println("Enter a the body of the message");
@@ -213,20 +190,18 @@ public class FaceSpace {
                     break;
                 case 8:
                     String oqa;
-                    String pqa;
+                    
                     String uqa;
                     String yqa;
                     String suba;
                     String boda;
                     int useqa = 0;
                     int usewa = 0;
-                    System.out.println("Enter a the first name of the sender");
+                    System.out.println("Enter a the name of the sender");
                     oqa = scan.nextLine();
-                    System.out.println("Enter a the last name of the sender");
-                    pqa = scan.nextLine();
                     System.out.println("Enter a the name of the group");
                     uqa = scan.nextLine();
-                    useqa = findId(oqa,pqa,con);
+                    useqa = findId(oqa,con);
                     usewa = findGId(uqa,con);
                     System.out.println("Enter a the subject of the message");
                     suba = scan.nextLine();
@@ -242,13 +217,10 @@ public class FaceSpace {
                     break;
                 case 9:
                     String nuy;
-                    String buy;
                     int muy;
-                    System.out.println("Enter a the first name of the user");
+                    System.out.println("Enter a the name of the user");
                     nuy = scan.nextLine();
-                    System.out.println("Enter a the last name of the user");
-                    buy = scan.nextLine();
-                    muy = findId(nuy,buy,con);
+                    muy = findId(nuy,con);
                     error = displayMessages(muy,con);
                     if(error!=0) {
                         System.out.println("Error displaying messages");
@@ -258,11 +230,9 @@ public class FaceSpace {
                     String auy;
                     String suy;
                     int duy;
-                    System.out.println("Enter a the first name of the user");
+                    System.out.println("Enter a the name of the user");
                     auy = scan.nextLine();
-                    System.out.println("Enter a the last name of the user");
-                    suy = scan.nextLine();
-                    duy = findId(auy,suy,con);
+                    duy = findId(auy,con);
                     error = displayNewMessages(duy,con);
                     if(error!=0) {
                         System.out.println("Error displaying messages");
@@ -292,13 +262,14 @@ public class FaceSpace {
             }
         }
 	}
-	public static int findId(String f, String l, Connection sql){
+	public static int findId(String f, Connection sql){
 
-        String ins = "SELECT * FROM users WHERE fname = " + f + " AND lname = " + l + "";
-        Statement s = null;
+        String ins = "SELECT * FROM users WHERE name=?";
+        PreparedStatement s = null;
         try {
-            s = sql.createStatement();
-            ResultSet rs = s.executeQuery(ins);
+            s = sql.prepareStatement(ins);
+            s.setString(1, f);
+            ResultSet rs = s.executeQuery();
             rs.next();
             return rs.getInt("user_id");
 
@@ -310,15 +281,15 @@ public class FaceSpace {
 
 public static String findName(int x, Connection sql){
 
-    String ins = "SELECT * FROM users WHERE user_id = " + x + "";
+    String ins = "SELECT * FROM users WHERE user_id =?";
     String total = "";
-    Statement s = null;
+    PreparedStatement s = null;
     try {
-        s = sql.createStatement();
+        s = sql.prepareStatement(ins);
+        s.setInt(1, x);
         ResultSet rs = s.executeQuery(ins);
         rs.next();
-        total = rs.getString("fname");
-        total = total + " " + rs.getString("lname");
+        total = rs.getString("name");
         return total;
 
     } catch (SQLException e) {
@@ -329,10 +300,11 @@ public static String findName(int x, Connection sql){
 
 public static int findGId(String x, Connection sql){
 
-    String ins = "SELECT * FROM groups WHERE gname = " + x + "";
-    Statement s = null;
+    String ins = "SELECT * FROM groups WHERE gname =?";
+    PreparedStatement s = null;
     try {
-        s = sql.createStatement();
+    	s = sql.prepareStatement(ins);
+        s.setString(1, x);
         ResultSet rs = s.executeQuery(ins);
         rs.next();
         return rs.getInt("g_id");
@@ -348,24 +320,28 @@ public static int createUser(String name, String email, String dob, Connection s
 	//java.util.Date utildate = null;
 	java.sql.Date date = null;
 	try{
-		
+		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+		java.util.Date parsed = format.parse(dob);
+		date = new java.sql.Date(parsed.getTime());
 		//utildate = new SimpleDateFormat("ddMMyyyy").parse(dob.replaceAll("/", ""));
-		date = new Date(Calendar.getInstance().getTimeInMillis());
+		//date = new Date((Calendar.getInstance().getTime()).getTime());
 	}
 	catch(Exception e){
 		e.printStackTrace();
 	}
-	String ins = "INSERT INTO users (user_ID, name, email, dob) VALUES(" + NEW_USER_ID + ", '" + name + "', '" + email + "', " + date + ")";
+	String ins = "INSERT INTO users (user_ID, name, email, dob) VALUES(?, ?, ?, ?)";
     Statement s = null;
-    //PreparedStatement prepStatement = sql.prepareStatement(ins);
+    
     
     try {
-    	//prepStatement.setInt(1, NEW_USER_ID);
-        //prepStatement.setString(2, name);
-        //prepStatement.setString(3, email);
-        //prepStatement.setDate(4, date);
-        s = sql.createStatement();
-        s.executeUpdate(ins);
+    	PreparedStatement prepStatement = sql.prepareStatement(ins);
+    	prepStatement.setInt(1, NEW_USER_ID);
+        prepStatement.setString(2, name);
+        prepStatement.setString(3, email);
+        prepStatement.setDate(4, date);
+        prepStatement.executeUpdate();
+        //s = sql.createStatement();
+        //s.executeUpdate(ins);
     } catch (SQLException e) {
         e.printStackTrace();
         return 1;
@@ -377,12 +353,16 @@ public static int createUser(String name, String email, String dob, Connection s
 
 public static int initiateFriendship(int userA, int userB, Connection sql) {
 
-    String ins = "INSERT INTO friendships (user_a,user_b) VALUES(" + userA + "," + userB + ")";
+    String ins = "INSERT INTO friendships (user_a,user_b) VALUES(?, ?)";
     Statement s = null;
 
     try {
-        s = sql.createStatement();
-        s.executeUpdate(ins);
+    	PreparedStatement prepStatement = sql.prepareStatement(ins);
+    	prepStatement.setInt(1, userA);
+        prepStatement.setInt(2, userB);
+        prepStatement.executeUpdate();
+        //s = sql.createStatement();
+        //s.executeUpdate(ins);
     } catch (SQLException e) {
         e.printStackTrace();
         return 1;
@@ -396,8 +376,12 @@ public static int establishFriendship(int userA, int userB, Connection sql){
     Statement s = null;
 
     try {
-        s = sql.createStatement();
-        s.executeUpdate(ins);
+    	PreparedStatement prepStatement = sql.prepareStatement(ins);
+    	prepStatement.setInt(1, userA);
+        prepStatement.setInt(2, userB);
+        prepStatement.executeUpdate();
+        //s = sql.createStatement();
+        //s.executeUpdate(ins);
     } catch (SQLException e) {
         e.printStackTrace();
         return 1;
@@ -444,12 +428,18 @@ public static int[] displayFriends(int userA, Connection sql){
 
 public static int createGroup(String name, String des, int limit, Connection sql){
 
-    String ins = "INSERT INTO groups VALUES(" + NEW_GROUP_ID + "," + name + "," + des + "," + limit + ")";
+    String ins = "INSERT INTO groups VALUES(?, ?, ?, ?)";
     Statement s = null;
 
     try {
-        s = sql.createStatement();
-        s.executeUpdate(ins);
+    	PreparedStatement prepStatement = sql.prepareStatement(ins);
+    	prepStatement.setInt(1, NEW_GROUP_ID);
+        prepStatement.setString(2, name);
+        prepStatement.setString(3, des);
+        prepStatement.setInt(4, limit);
+        prepStatement.executeUpdate();
+        //s = sql.createStatement();
+        //s.executeUpdate(ins);
     } catch (SQLException e) {
         e.printStackTrace();
         return 1;
@@ -462,20 +452,22 @@ public static int createGroup(String name, String des, int limit, Connection sql
 public static int addToGroup(int userID, int groupID, Connection sql){
     int cnt = 0;
     int lmt = 0;
-    Statement s = null;
+    PreparedStatement s = null;
     //cnt <- SELECT COUNT(userID) FROM members WHERE groudID = gid
-    String ins = "SELECT COUNT(userID) AS da_count FROM members WHERE gid = " + groupID + " GROUP BY userID";
+    String ins = "SELECT COUNT(userID) AS da_count FROM members WHERE gid = ? GROUP BY userID";
     try {
-        s = sql.createStatement();
+    	s = sql.prepareStatement(ins);
+        s.setInt(1, groupID);
         ResultSet rs = s.executeQuery(ins);
         cnt= rs.getInt("da_count");
 
     } catch (SQLException e) {
         e.printStackTrace();
     }
-    ins = "SELECT limit FROM groups WHERE gid = " + groupID + "";
+    ins = "SELECT limit FROM groups WHERE gid = ?";
     try {
-        s = sql.createStatement();
+    	s = sql.prepareStatement(ins);
+        s.setInt(1, groupID);
         ResultSet rs = s.executeQuery(ins);
         lmt= rs.getInt("limit");
 
@@ -483,9 +475,11 @@ public static int addToGroup(int userID, int groupID, Connection sql){
         e.printStackTrace();
     }
     if(cnt+1>lmt){
-        ins = "INSERT INTO members VALUES(" + userID + "," + groupID + ")";
+        ins = "INSERT INTO members VALUES(?, ?)";
         try {
-            s = sql.createStatement();
+        	s = sql.prepareStatement(ins);
+            s.setInt(1, userID);
+            s.setInt(2, groupID);
             s.executeUpdate(ins);
 
         } catch (SQLException e) {
@@ -502,14 +496,22 @@ public static int addToGroup(int userID, int groupID, Connection sql){
 
 public static int sendMessageToUser(String subject, String body, int to, int from, Connection sql){
 
-    String ins = "INSERT INTO messages VALUES(" + NEW_MSG_ID + "," + subject + "," + body + "," + to + "," + from + "," + 1 +")";
+    String ins = "INSERT INTO messages VALUES(?, ?, ?, ?, ?, ?)";
     // INSERT INTO messages(NEW_MSG_ID,subject,body,from,to,1)
 
     Statement s = null;
 
     try {
-        s = sql.createStatement();
-        s.executeUpdate(ins);
+    	PreparedStatement prepStatement = sql.prepareStatement(ins);
+    	prepStatement.setInt(1, NEW_MSG_ID);
+        prepStatement.setString(2, subject);
+        prepStatement.setString(3, body);
+        prepStatement.setInt(4, to);
+        prepStatement.setInt(5, from);
+        prepStatement.setInt(6, 1);
+    	prepStatement.executeUpdate();
+        //s = sql.createStatement();
+        //s.executeUpdate(ins);
     } catch (SQLException e) {
         e.printStackTrace();
         return 1;
@@ -522,13 +524,21 @@ public static int sendMessageToGroup(String subject, String body, int to, int fr
 
     // INSERT INTO messages(NEW_MSG_ID,subject,body,from,to,0)
 
-    String ins = "INSERT INTO messages VALUES(" + NEW_MSG_ID + "," + subject + "," + body + "," + to + "," + from + "," + 0 +")";
+    String ins = "INSERT INTO messages VALUES(?, ?, ?, ?, ?, ?)";
 
     Statement s = null;
 
     try {
-        s = sql.createStatement();
-        s.executeUpdate(ins);
+    	PreparedStatement prepStatement = sql.prepareStatement(ins);
+    	prepStatement.setInt(1, NEW_MSG_ID);
+        prepStatement.setString(2, subject);
+        prepStatement.setString(3, body);
+        prepStatement.setInt(4, to);
+        prepStatement.setInt(5, from);
+        prepStatement.setInt(6, 0);
+    	prepStatement.executeUpdate();
+        //s = sql.createStatement();
+        //s.executeUpdate(ins);
     } catch (SQLException e) {
         e.printStackTrace();
         return 1;
@@ -546,11 +556,12 @@ public static int displayMessages(int user, Connection sql){
     //  )
     //)
     //print neatly
-    String ins = "SELECT * FROM friendships WHERE " + user + " = rid";
+    String ins = "SELECT * FROM friendships WHERE ? = rid";
     // Print neatly
-    Statement s = null;
+    PreparedStatement s = null;
     try {
-        s = sql.createStatement();
+        s = sql.prepareStatement(ins);
+        s.setInt(1, user);
         ResultSet rs = s.executeQuery(ins);
         while(rs.next()){
             System.out.println("To: " + user);
@@ -565,11 +576,11 @@ public static int displayMessages(int user, Connection sql){
 
     ins = "SELECT * FROM messages WHERE rid = (" +
         "SELECT gid FROM groups WHERE gid = (" +
-            "SELECT gid FROM members WHERE user_id = " + user +
-            "))";
+            "SELECT gid FROM members WHERE user_id = ?))";
 
     try {
-        s = sql.createStatement();
+    	s = sql.prepareStatement(ins);
+        s.setInt(1, user);
         ResultSet rs = s.executeQuery(ins);
         while(rs.next()){
             System.out.println("To: " + user);
@@ -594,12 +605,13 @@ public static int displayNewMessages(int user, Connection sql){
     //)
     //print neatly
 
-    String ins = "SELECT * FROM friendships WHERE " + user + " = rid AND date_sent > (" +
-            "SELECT last_login FROM members WHERE user_id = " + user + ")";
+    String ins = "SELECT * FROM friendships WHERE ? = rid AND date_sent > (" +
+            "SELECT last_login FROM members WHERE user_id = ?)";
     // Print neatlyStatement s = null;\
-    Statement s = null;
+    PreparedStatement s = null;
     try {
-        s = sql.createStatement();
+    	s = sql.prepareStatement(ins);
+        s.setInt(1, user);
         ResultSet rs = s.executeQuery(ins);
         while(rs.next()){
             System.out.println("To: " + user);
@@ -614,12 +626,12 @@ public static int displayNewMessages(int user, Connection sql){
 
     ins = "SELECT * FROM messages WHERE rid = (" +
             "SELECT gid FROM groups WHERE gid = (" +
-            "SELECT gid FROM members WHERE user_id = " + user +
-            ")) AND date_sent > (" +
-            "SELECT last_login FROM members WHERE user_id = " + user + ")";
+            "SELECT gid FROM members WHERE user_id = ?)) AND date_sent > (" +
+            "SELECT last_login FROM members WHERE user_id = ?)";
 
     try {
-        s = sql.createStatement();
+    	s = sql.prepareStatement(ins);
+        s.setInt(1, user);
         ResultSet rs = s.executeQuery(ins);
         while(rs.next()){
             System.out.println("To: " + user);
@@ -639,13 +651,14 @@ public static int searchForUser(String st, Connection sql){
     String[] all;
     all = st.split("[^\\w']");
     for(int i=0; i<all.length;i++){
-        String ins = "SELECT * FROM users WHERE fname LIKE '%'" + all[i] + "'%' OR lname '%'" + all[i] + "'%'";
-        Statement s = null;
+        String ins = "SELECT * FROM users WHERE name LIKE '%' ? '%'";
+        PreparedStatement s = null;
         try {
-            s = sql.createStatement();
+        	s = sql.prepareStatement(ins);
+            s.setString(1, st);
             ResultSet rs = s.executeQuery(ins);
             while(rs.next()){
-                System.out.println(rs.getString("fname") + " " + rs.getString("lname"));
+                System.out.println(rs.getString("name"));
             }
 
         } catch (SQLException e) {
