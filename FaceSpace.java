@@ -9,10 +9,12 @@ import java.util.Locale;
 import java.util.Scanner;
 //import oracle.jdbc.*;
 public class FaceSpace {
-    static int NEW_USER_ID = 200;
-    static int NEW_GROUP_ID = 50;
-    static int NEW_MSG_ID = 500;
-	private Connection con;
+	static int NEW_USER_ID = 0;
+	static int NEW_GROUP_ID = 0;
+	static int NEW_MSG_ID = 0;
+	private static Connection con;
+	
+
 	public FaceSpace(Connection con){
 		this.con = con;
 	}
@@ -262,9 +264,56 @@ public class FaceSpace {
             }
         }
 	}
+	public static int getUIDM(Connection sql){
+		int max = 0;
+		String ins = "SELECT MAX(user_ID) AS mx FROM users";
+		try{
+			Statement s = sql.createStatement();
+			ResultSet rs = s.executeQuery(ins);
+			while(rs.next()){
+				max = rs.getInt("mx");
+			}
+		}
+		catch (SQLException e){
+			e.printStackTrace();
+		}
+		return max;
+	}
+	public static int getGIDM(Connection sql){
+		int max = 0;
+		String ins = "SELECT MAX(g_ID) AS mx FROM groups";
+		PreparedStatement s = null;
+		try{
+			s = sql.prepareStatement(ins);
+			ResultSet rs = s.executeQuery(ins);
+			while(rs.next()){
+				max = rs.getInt("mx");
+			}
+		}
+		catch (SQLException e){
+			e.printStackTrace();
+		}
+		return max;
+	}
+	public static int getMIDM(Connection sql){
+		int max = 0;
+		String ins = "SELECT MAX(msg_ID) AS mx FROM messages";
+		PreparedStatement s = null;
+		try{
+			s = sql.prepareStatement(ins);
+			ResultSet rs = s.executeQuery(ins);
+			while(rs.next()){
+				max = rs.getInt("mx");
+			}
+		}
+		catch (SQLException e){
+			e.printStackTrace();
+		}
+		return max;
+	}
 	public static int findId(String f, Connection sql){
 
-        String ins = "SELECT * FROM users WHERE name=?";
+        String ins = "SELECT * FROM users WHERE name= ?";
         PreparedStatement s = null;
         try {
             s = sql.prepareStatement(ins);
@@ -281,12 +330,12 @@ public class FaceSpace {
 
 public static String findName(int x, Connection sql){
 
-    String ins = "SELECT * FROM users WHERE user_id =?";
+    String ins = "SELECT * FROM users WHERE user_ID = " + x;
     String total = "";
-    PreparedStatement s = null;
+    Statement s = null;
     try {
-        s = sql.prepareStatement(ins);
-        s.setInt(1, x);
+        s = sql.createStatement();
+        //s.setInt(1, x);
         ResultSet rs = s.executeQuery(ins);
         rs.next();
         total = rs.getString("name");
@@ -300,12 +349,12 @@ public static String findName(int x, Connection sql){
 
 public static int findGId(String x, Connection sql){
 
-    String ins = "SELECT * FROM groups WHERE gname =?";
+    String ins = "SELECT * FROM groups WHERE gname = ?";
     PreparedStatement s = null;
     try {
     	s = sql.prepareStatement(ins);
         s.setString(1, x);
-        ResultSet rs = s.executeQuery(ins);
+        ResultSet rs = s.executeQuery();
         rs.next();
         return rs.getInt("g_id");
 
@@ -372,7 +421,7 @@ public static int initiateFriendship(int userA, int userB, Connection sql) {
 
 public static int establishFriendship(int userA, int userB, Connection sql){
 
-    String ins = "UPDATE friendships SET pending = 0 WHERE " + userA + " = user_A AND " + userB + " = user_B";
+    String ins = "UPDATE friendships SET pending = 0 WHERE ? = user_A AND ? = user_B";
     Statement s = null;
 
     try {
@@ -398,26 +447,27 @@ public static int[] displayFriends(int userA, Connection sql){
     int A = 0;
     int B = 0;
     int[] out = null;
+    ArrayList<Integer> out2 = new ArrayList<Integer>();
     try {
         s = sql.createStatement();
         ResultSet rs = s.executeQuery(ins);
-        if(rs!=null){
-            rs.beforeFirst();
-            rs.last();
-            size = rs.getRow();
-            rs.beforeFirst();
-        }
-        out = new int[size];
+        
+        
         while(rs.next()){
             A = rs.getInt("user_a");
             B = rs.getInt("user_b");
             if(A == userA){
-                out[c] = B;
+                out2.add(B);
             }
             else{
-                out[c] = A;
+                out2.add(A);
             }
             c++;
+        }
+        size = out2.size();
+        out = new int[size];
+        for (int i = 0; i < size; i++){
+        	out[i] = out2.get(i);
         }
 
     } catch (SQLException e) {
@@ -454,33 +504,42 @@ public static int addToGroup(int userID, int groupID, Connection sql){
     int lmt = 0;
     PreparedStatement s = null;
     //cnt <- SELECT COUNT(userID) FROM members WHERE groudID = gid
-    String ins = "SELECT COUNT(userID) AS da_count FROM members WHERE gid = ? GROUP BY userID";
+    String ins = "SELECT COUNT(u_ID) AS da_count FROM members WHERE g_ID = ? GROUP BY u_ID";
     try {
     	s = sql.prepareStatement(ins);
         s.setInt(1, groupID);
-        ResultSet rs = s.executeQuery(ins);
-        cnt= rs.getInt("da_count");
+        ResultSet rs = s.executeQuery();
+        if(rs != null){
+        	rs.next();
+            cnt = rs.getInt("da_count");
+        }
 
     } catch (SQLException e) {
         e.printStackTrace();
     }
-    ins = "SELECT limit FROM groups WHERE gid = ?";
+    ins = "SELECT glimit FROM groups WHERE g_ID = ?";
     try {
     	s = sql.prepareStatement(ins);
         s.setInt(1, groupID);
-        ResultSet rs = s.executeQuery(ins);
-        lmt= rs.getInt("limit");
+        ResultSet rs = s.executeQuery();
+        if (rs != null){
+        	rs.next();
+            lmt= rs.getInt("glimit");
+        }
+        
 
     } catch (SQLException e) {
         e.printStackTrace();
     }
-    if(cnt+1>lmt){
+    System.out.println(cnt);
+    System.out.println(lmt);
+    if((cnt+1) <= lmt){
         ins = "INSERT INTO members VALUES(?, ?)";
         try {
         	s = sql.prepareStatement(ins);
             s.setInt(1, userID);
             s.setInt(2, groupID);
-            s.executeUpdate(ins);
+            s.executeUpdate();
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -488,6 +547,7 @@ public static int addToGroup(int userID, int groupID, Connection sql){
         }
     }
     else{
+    	System.out.println("this is the error");
         return 1;
     }
 
@@ -496,7 +556,7 @@ public static int addToGroup(int userID, int groupID, Connection sql){
 
 public static int sendMessageToUser(String subject, String body, int to, int from, Connection sql){
 
-    String ins = "INSERT INTO messages VALUES(?, ?, ?, ?, ?, ?)";
+    String ins = "INSERT INTO messages (msg_ID, subject, body, sender, r_ID, is_user) VALUES(?, ?, ?, ?, ?, ?)";
     // INSERT INTO messages(NEW_MSG_ID,subject,body,from,to,1)
 
     Statement s = null;
@@ -506,8 +566,8 @@ public static int sendMessageToUser(String subject, String body, int to, int fro
     	prepStatement.setInt(1, NEW_MSG_ID);
         prepStatement.setString(2, subject);
         prepStatement.setString(3, body);
-        prepStatement.setInt(4, to);
-        prepStatement.setInt(5, from);
+        prepStatement.setInt(4, from);
+        prepStatement.setInt(5, to);
         prepStatement.setInt(6, 1);
     	prepStatement.executeUpdate();
         //s = sql.createStatement();
@@ -524,7 +584,7 @@ public static int sendMessageToGroup(String subject, String body, int to, int fr
 
     // INSERT INTO messages(NEW_MSG_ID,subject,body,from,to,0)
 
-    String ins = "INSERT INTO messages VALUES(?, ?, ?, ?, ?, ?)";
+    String ins = "INSERT INTO messages (msg_ID, subject, body, sender, r_ID, is_user) VALUES(?, ?, ?, ?, ?, ?)";
 
     Statement s = null;
 
@@ -533,8 +593,8 @@ public static int sendMessageToGroup(String subject, String body, int to, int fr
     	prepStatement.setInt(1, NEW_MSG_ID);
         prepStatement.setString(2, subject);
         prepStatement.setString(3, body);
-        prepStatement.setInt(4, to);
-        prepStatement.setInt(5, from);
+        prepStatement.setInt(4, from);
+        prepStatement.setInt(5, to);
         prepStatement.setInt(6, 0);
     	prepStatement.executeUpdate();
         //s = sql.createStatement();
@@ -548,6 +608,24 @@ public static int sendMessageToGroup(String subject, String body, int to, int fr
 }
 
 public static int displayMessages(int user, Connection sql){
+	/*
+	String ins3 = "SELECT * FROM messages";
+	PreparedStatement s3 = null;
+	try{
+		s3 = sql.prepareStatement(ins3);
+		ResultSet rs3 = s3.executeQuery();
+		while(rs3.next()){
+			System.out.println("To: " + findName(rs3.getInt("r_ID"), sql));
+            System.out.println("From: " + findName(rs3.getInt("sender"), sql));
+            System.out.println("Subject: " + rs3.getString("subject"));
+            System.out.println("Is User?" + rs3.getInt("is_user"));
+            System.out.println("Body: " + rs3.getString("body") + "\n\n\n");
+            
+		}
+	}catch(SQLException e){
+		e.printStackTrace();
+	}
+	*/
     //SELECT * FROM messages WHERE rid = user
     //print neatly
     //SELECT * FROM messages WHERE rid = (
@@ -556,16 +634,17 @@ public static int displayMessages(int user, Connection sql){
     //  )
     //)
     //print neatly
-    String ins = "SELECT * FROM friendships WHERE ? = rid";
+    String ins = "SELECT * FROM messages WHERE " + user + " = r_ID AND is_user = 1";
+    String ins2 = "";
     // Print neatly
-    PreparedStatement s = null;
+    Statement s = null;
     try {
-        s = sql.prepareStatement(ins);
-        s.setInt(1, user);
+        s = sql.createStatement();
+        //s.setInt(1, user);
         ResultSet rs = s.executeQuery(ins);
         while(rs.next()){
-            System.out.println("To: " + user);
-            System.out.println("From: " + rs.getString("sender"));
+            System.out.println("To: " + findName(user, sql));
+            System.out.println("From: " + findName(rs.getInt("sender"), sql));
             System.out.println("Subject: " + rs.getString("subject"));
             System.out.println("Body: " + rs.getString("body") + "\n\n\n");
         }
@@ -573,21 +652,30 @@ public static int displayMessages(int user, Connection sql){
     } catch (SQLException e) {
         e.printStackTrace();
     }
-
-    ins = "SELECT * FROM messages WHERE rid = (" +
-        "SELECT gid FROM groups WHERE gid = (" +
-            "SELECT gid FROM members WHERE user_id = ?))";
+    ins = "SELECT g_ID FROM members WHERE u_ID = " + user;
+    ArrayList<Integer> ar = new ArrayList<Integer>();
+    
+    
 
     try {
-    	s = sql.prepareStatement(ins);
-        s.setInt(1, user);
+    	s = sql.createStatement();
+        //s.setInt(1, user);
         ResultSet rs = s.executeQuery(ins);
         while(rs.next()){
-            System.out.println("To: " + user);
-            System.out.println("From: " + rs.getString("sender"));
-            System.out.println("Subject: " + rs.getString("subject"));
-            System.out.println("Body: " + rs.getString("body") + "\n\n\n");
+        	ar.add(rs.getInt("g_ID")); 
         }
+        for (int i = 0; i < ar.size(); i++){
+    		ins2 = "SELECT * FROM messages WHERE r_ID = ? AND is_user = 0";
+    		PreparedStatement s2 = sql.prepareStatement(ins2);
+    		s2.setInt(1, ar.get(i));
+    		ResultSet rs2 = s2.executeQuery();
+    		while(rs2.next()){
+    			System.out.println("To: " + findName(user, sql));
+                System.out.println("From: " + findName(rs2.getInt("sender"), sql));
+                System.out.println("Subject: " + rs2.getString("subject"));
+                System.out.println("Body: " + rs2.getString("body") + "\n\n\n");
+    		}
+    	}
 
     } catch (SQLException e) {
         e.printStackTrace();
@@ -748,6 +836,11 @@ public static int searchForUser(String st, Connection sql){
 			  DriverManager.registerDriver( myDriver );
 			  con = DriverManager.getConnection("jdbc:oracle:thin:@class3.cs.pitt.edu:1521:dbclass", "mik92", "89iokl-zx");
 			  FaceSpace facespace = new FaceSpace(con);
+			  
+			  NEW_USER_ID = getUIDM(con) + 1;
+			  NEW_GROUP_ID = getGIDM(con) + 1;
+			  NEW_MSG_ID = getMIDM(con) + 1;
+			  
 			  facespace.run();
 
 		}
