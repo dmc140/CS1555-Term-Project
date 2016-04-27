@@ -250,13 +250,40 @@ public class FaceSpace {
                     }
                     break;
                 case 12:
+                	String one;
+                	String two;
+                	System.out.println("Enter the first user");
+                    one = scan.nextLine();
+                    //System.out.println(n);
+                    System.out.println("Enter the second user");
+                    two = scan.nextLine();
+                	threeDegrees(findId(one, con), findId(two, con), con);
 
                     break;
                 case 13:
-
+                	int k;
+                	int x;
+                	System.out.println("How many users?");
+                	k = scan.nextInt();
+                	scan.nextLine();
+                	System.out.println("How many months?");
+                	x = scan.nextInt();
+                	scan.nextLine();
+                	topMessagers(x, k, con);
                     break;
                 case 14:
+                	String drop;
+                    System.out.println("Enter a name");
+                    drop = scan.nextLine();
 
+                    error = dropUser(findId(drop, con),con);
+
+                    if(error!=0){
+                        System.out.println("Error Dropping User");
+                    }
+                    else{
+                        System.out.println("User Dropped");
+                    }
                     break;
                 default:
                     System.out.println("Error");
@@ -362,6 +389,24 @@ public static int findGId(String x, Connection sql){
         e.printStackTrace();
     }
     return -1;
+}
+
+public static String findGName(int x, Connection sql){
+	String ins = "SELECT * FROM groups WHERE g_ID = " + x;
+    String total = "";
+    Statement s = null;
+    try {
+        s = sql.createStatement();
+        //s.setInt(1, x);
+        ResultSet rs = s.executeQuery(ins);
+        rs.next();
+        total = rs.getString("gname");
+        return total;
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return total;
 }
 
 public static int createUser(String name, String email, String dob, Connection sql) {
@@ -693,40 +738,75 @@ public static int displayNewMessages(int user, Connection sql){
     //)
     //print neatly
 
-    String ins = "SELECT * FROM friendships WHERE ? = rid AND date_sent > (" +
-            "SELECT last_login FROM members WHERE user_id = ?)";
+    String ins = "SELECT last_log FROM users WHERE user_ID = ?";
+    String ins2 = "";
+    ArrayList<Timestamp> ar = new ArrayList<Timestamp>();
     // Print neatlyStatement s = null;\
     PreparedStatement s = null;
     try {
     	s = sql.prepareStatement(ins);
         s.setInt(1, user);
-        ResultSet rs = s.executeQuery(ins);
+        ResultSet rs = s.executeQuery();
         while(rs.next()){
-            System.out.println("To: " + user);
-            System.out.println("From: " + rs.getString("sender"));
-            System.out.println("Subject: " + rs.getString("subject"));
-            System.out.println("Body: " + rs.getString("body") + "\n\n\n");
+        	ar.add(rs.getTimestamp("last_log"));
         }
+        for (int i = 0; i < ar.size(); i++){
+        	ins2 = "SELECT * FROM messages WHERE ? = r_ID AND date_sent > ?";
+        	PreparedStatement s2 = sql.prepareStatement(ins2);
+        	s2.setInt(1, user);
+        	s2.setTimestamp(2, ar.get(i));
+        	ResultSet rs2 = s2.executeQuery();
+            while(rs2.next()){
+                System.out.println("To: " + findName(user, sql));
+                System.out.println("From: " + findName(rs2.getInt("sender"), sql));
+                System.out.println("Subject: " + rs2.getString("subject"));
+                System.out.println("Body: " + rs2.getString("body") + "\n\n\n");
+            }
+        }
+        
+        
+
 
     } catch (SQLException e) {
         e.printStackTrace();
     }
 
-    ins = "SELECT * FROM messages WHERE rid = (" +
-            "SELECT gid FROM groups WHERE gid = (" +
-            "SELECT gid FROM members WHERE user_id = ?)) AND date_sent > (" +
-            "SELECT last_login FROM members WHERE user_id = ?)";
+    ins = "SELECT last_log FROM users WHERE user_ID = ?";
+    String ins3 = "";
+    ArrayList<Timestamp> ar2 = new ArrayList<Timestamp>();
 
     try {
     	s = sql.prepareStatement(ins);
         s.setInt(1, user);
-        ResultSet rs = s.executeQuery(ins);
+        ResultSet rs = s.executeQuery();
         while(rs.next()){
-            System.out.println("To: " + user);
-            System.out.println("From: " + rs.getString("sender"));
-            System.out.println("Subject: " + rs.getString("subject"));
-            System.out.println("Body: " + rs.getString("body") + "\n\n\n");
+        	ar2.add(rs.getTimestamp("last_log"));
         }
+        for (int i = 0; i < ar2.size(); i++){
+        	ins2 = "SELECT g_ID FROM members WHERE u_ID = ?";
+        	ArrayList<Integer> ar3 = new ArrayList<Integer>();
+        	PreparedStatement s2 = sql.prepareStatement(ins2);
+        	s2.setInt(1, user);
+        	ResultSet rs2 = s2.executeQuery();
+        	while(rs2.next()){
+        		ar3.add(rs2.getInt("g_ID"));
+        	}
+        	for (int j = 0; j < ar3.size(); j++){
+        		ins3 = "SELECT * FROM messages WHERE ? = r_ID AND date_sent > ?";
+        		PreparedStatement s3 = sql.prepareStatement(ins3);
+        		s3.setInt(1, ar3.get(i));
+        		s3.setTimestamp(2, ar2.get(i));
+        		ResultSet rs3 = s3.executeQuery();
+                while(rs3.next()){
+                    System.out.println("To: " + findName(user, sql));
+                    System.out.println("From: " + findName(rs3.getInt("sender"), sql));
+                    System.out.println("Subject: " + rs3.getString("subject"));
+                    System.out.println("Body: " + rs3.getString("body") + "\n\n\n");
+                }
+        	}
+        	
+        }
+
 
     } catch (SQLException e) {
         e.printStackTrace();
@@ -738,20 +818,28 @@ public static int displayNewMessages(int user, Connection sql){
 public static int searchForUser(String st, Connection sql){
     String[] all;
     all = st.split("[^\\w']");
-    for(int i=0; i<all.length;i++){
-        String ins = "SELECT * FROM users WHERE name LIKE '%' ? '%'";
+    int flag = 0;
+    for(int i = 0; i < all.length; i++){
+        String ins = "SELECT * FROM users WHERE name LIKE ? OR email LIKE ?";
         PreparedStatement s = null;
         try {
         	s = sql.prepareStatement(ins);
-            s.setString(1, st);
-            ResultSet rs = s.executeQuery(ins);
+            s.setString(1, all[i] + "%");
+            s.setString(2, all[i] + "%");
+            ResultSet rs = s.executeQuery();
             while(rs.next()){
+            	flag = 1;
                 System.out.println(rs.getString("name"));
             }
+            
 
         } catch (SQLException e) {
             e.printStackTrace();
+            return 1;
         }
+    }
+    if (flag == 0){
+    	System.out.println("No results found.");
     }
     return 0;
 }
@@ -777,7 +865,7 @@ public static int searchForUser(String st, Connection sql){
 				for (int k = 0; k < e.length; k++){
 					if (userB == e[k]){
 						noPath = false;
-						System.out.println(userA + " -> " + c[i] + " -> " + d[j] + " -> " + userB);
+						System.out.println(findName(userA, sql) + " -> " + findName(c[i], sql) + " -> " + findName(d[j], sql) + " -> " + findName(userB, sql) + "\n");
 					}
 				}
 			}
@@ -785,46 +873,154 @@ public static int searchForUser(String st, Connection sql){
 		if (!res.isEmpty()){
 			noPath = false;
 			for (int i = 0; i < res.size(); i++){
-				System.out.println(userA + " -> " + res.get(i) + " -> " + userB);
+				System.out.println(findName(userA, sql) + " -> " + findName(res.get(i), sql) + " -> " + findName(userB, sql) + "\n");
 			}
 		}
 
 		if (isFriend){
-			System.out.print(userA + " -> " + userB);
+			System.out.print(findName(userA, sql) + " -> " + findName(userB, sql) + "\n");
 			noPath = false;
 		}
 		if (noPath){
-			System.out.println("No path exists between these two users.");
+			System.out.println("No path exists between these two users.\n");
 		}
 		
 	}
 	
-	public static void topMessages(int x, int k){
+	public static void topMessagers(int x, int k, Connection sql){
+		/*
+		String query = "SELECT * FROM messages";
+		try {
+			PreparedStatement prep = sql.prepareStatement(query);
+			ResultSet rs = prep.executeQuery();
+			while(rs.next()){
+				System.out.println(findName(rs.getInt("sender"), sql));
+				System.out.println(rs.getInt("r_ID"));
+				System.out.println(rs.getInt("is_user"));
+				System.out.println();
+			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		*/
+		
 		Calendar calendar = Calendar.getInstance();
 		//java.sql.Date curr_date = new java.sql.Date(calendar.getTime().getTime());
-		calendar.add(calendar.MONTH, x);
+		calendar.add(calendar.MONTH, -x);
 		java.sql.Date date = new java.sql.Date(calendar.getTime().getTime());
 		//sql statement group by sender or r_id
+		String ins = "SELECT COUNT(sender) AS cnt, sender FROM messages WHERE ? " + 
+				"< date_sent GROUP BY sender";
+		String ins2 = "SELECT COUNT(r_ID) AS r1, r_ID FROM messages WHERE ? " +
+				"< date_sent AND is_user = 0 GROUP BY r_ID";
+		String ins3 = "SELECT COUNT(r_ID) AS r2, r_ID FROM messages WHERE ? " +
+				"< date_sent AND is_user = 1 GROUP BY r_ID";
+		ArrayList<Integer> count1 = new ArrayList<Integer>();
+		ArrayList<Integer> sender = new ArrayList<Integer>();
+		ArrayList<Integer> count2 = new ArrayList<Integer>();
+		ArrayList<Integer> rec1 = new ArrayList<Integer>();
+		ArrayList<Integer> count3 = new ArrayList<Integer>();
+		ArrayList<Integer> rec2 = new ArrayList<Integer>();
+		
+		try {
+			PreparedStatement s = sql.prepareStatement(ins);
+			s.setDate(1, date);
+			ResultSet rs = s.executeQuery();
+			while(rs.next()){
+				count1.add(rs.getInt("cnt"));
+				sender.add(rs.getInt("sender"));
+			}
+			
+			PreparedStatement s2 = sql.prepareStatement(ins2);
+			s2.setDate(1, date);
+			ResultSet rs2 = s2.executeQuery();
+			while(rs2.next()){
+				count2.add(rs2.getInt("r1"));
+				rec1.add(rs2.getInt("r_ID"));
+			}
+			
+			PreparedStatement s3 = sql.prepareStatement(ins3);
+			s3.setDate(1, date);
+			ResultSet rs3 = s3.executeQuery();
+			while(rs3.next()){
+				count3.add(rs3.getInt("r2"));
+				rec2.add(rs3.getInt("r_ID"));
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
 		for (int i = 0; i < k; i++){
+			int max = 0;
+			int name = 0;
+			int flag = 0;
+			int index = 0;
+			for (int j = 0; j < count1.size(); j++){
+				if (count1.get(j) > max){
+					max = count1.get(j);
+					name = sender.get(j);
+					flag = 1;
+					index = j;
+				}
+			}
+			for (int j = 0; j < count2.size(); j++){
+				if (count2.get(j) > max){
+					max = count2.get(j);
+					name = rec1.get(j);
+					flag = 2;
+					index = j;
+				}
+			}
+			for (int j = 0; j < count3.size(); j++){
+				if (count3.get(j) > max){
+					max = count3.get(j);
+					name = rec2.get(j);
+					flag = 3;
+					index = j;
+				}
+			}
+			if (flag == 1){
+				System.out.println(findName(name, sql) + " sent " + max + " messages.");
+				count1.remove(index);
+				sender.remove(index);
+			}
+			else if (flag == 2){
+				System.out.println("Group " + findGName(name, sql) + " recieved " + max + " messages.");
+				count2.remove(index);
+				rec1.remove(index);
+			}
+			else if (flag == 3){
+				System.out.println(findName(name, sql) + " recieved " + max + " messages.");
+				count3.remove(index);
+				rec2.remove(index);
+			}
 			
 		}
 	}
 	
-	public static void dropUser(int id, Connection sql){
+	public static int dropUser(int id, Connection sql){
 		try{
+			String msg_query = "DELETE FROM messages WHERE sender="+id+" AND NOT EXISTS("
+					+ "SELECT user_ID FROM users WHERE user_ID=r_ID) OR r_ID="+id+"AND NOT EXISTS("
+					+ "SELECT user_ID FROM users WHERE user_ID=sender)";
+			PreparedStatement prepStatement2 = sql.prepareStatement(msg_query);
+			prepStatement2.executeUpdate();
+			String fs_query = "DELETE FROM friendships WHERE user_a = " + id + "OR user_b = " + id;
+			PreparedStatement prepStatement3 = sql.prepareStatement(fs_query);
+			prepStatement3.executeUpdate();
 			String user_query = "DELETE FROM users WHERE user_ID="+id;
 			PreparedStatement prepStatement = sql.prepareStatement(user_query);
 			prepStatement.executeUpdate();
-			String msg_query = "DELETE FROM messages WHERE sender="+id+" AND NOT EXISTS("
-					+ "SELECT user_ID FROM users WHERE user_id=r_ID) OR r_ID="+id+"AND NOT EXISTS("
-					+ "SELECT user_id FROM users WHERE user_id=sender)";
-			PreparedStatement prepStatement2 = sql.prepareStatement(msg_query);
-			prepStatement2.executeUpdate();
+			
+			
 		}
 		catch(Exception e){
 			System.out.println("Error: " + e);
 			System.exit(1);
+			return 1;
 		}
+		return 0;
 		
 	}
 	
