@@ -56,6 +56,14 @@ BEGIN
 END;
 /
 
+CREATE OR REPLACE TRIGGER drop_user
+BEFORE DELETE ON users
+FOR EACH ROW
+BEGIN 
+        DELETE FROM members WHERE members.u_ID = :old.user_ID;
+END;
+/
+
 INSERT INTO users VALUES(1, 'John', 'john@gmail.com', CURRENT_TIMESTAMP, NULL);
 INSERT INTO users VALUES(2, 'Dave', 'dave@gmail.com', CURRENT_TIMESTAMP, NULL);
 INSERT INTO users VALUES(3, 'Mike', 'mike@gmail.com', CURRENT_TIMESTAMP, NULL);
