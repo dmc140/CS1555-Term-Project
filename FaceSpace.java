@@ -20,19 +20,6 @@ public class FaceSpace {
 	}
 	public void run(){
 		System.out.println("Connected.");
-		/*
-		try{
-			
-		String trigger = "CREATE OR REPLACE TRIGGER drop_user BEFORE DELETE ON users FOR EACH ROW "
-				+ "BEGIN DELETE FROM members WHERE u_ID=users.user_id; END;/ ";
-		PreparedStatement prepStatement = con.prepareStatement(trigger);
-		prepStatement.executeUpdate();
-		}
-		catch(Exception e){
-			System.out.println("Error: " + e);
-			System.exit(1);
-		}
-		*/
 		int choice = 1;
         int error;
         //Connection conn = null;
@@ -888,7 +875,7 @@ public static int searchForUser(String st, Connection sql){
 	}
 	
 	public static void topMessagers(int x, int k, Connection sql){
-		/*
+		
 		String query = "SELECT * FROM messages";
 		try {
 			PreparedStatement prep = sql.prepareStatement(query);
@@ -902,7 +889,7 @@ public static int searchForUser(String st, Connection sql){
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
-		*/
+		
 		
 		Calendar calendar = Calendar.getInstance();
 		//java.sql.Date curr_date = new java.sql.Date(calendar.getTime().getTime());
@@ -915,6 +902,7 @@ public static int searchForUser(String st, Connection sql){
 				"< date_sent AND is_user = 0 GROUP BY r_ID";
 		String ins3 = "SELECT COUNT(r_ID) AS r2, r_ID FROM messages WHERE ? " +
 				"< date_sent AND is_user = 1 GROUP BY r_ID";
+		String ins4 = "SELECT COUNT(u_ID) AS u1, u_ID FROM messages JOIN members ON messages.r_id = members.g_id WHERE is_user = 0 GROUP BY u_ID";
 		ArrayList<Integer> count1 = new ArrayList<Integer>();
 		ArrayList<Integer> sender = new ArrayList<Integer>();
 		ArrayList<Integer> count2 = new ArrayList<Integer>();
@@ -931,30 +919,49 @@ public static int searchForUser(String st, Connection sql){
 				sender.add(rs.getInt("sender"));
 			}
 			
-			PreparedStatement s2 = sql.prepareStatement(ins2);
-			s2.setDate(1, date);
+			PreparedStatement s2 = sql.prepareStatement(ins4);
+			//s2.setDate(1, date);
 			ResultSet rs2 = s2.executeQuery();
 			while(rs2.next()){
-				count2.add(rs2.getInt("r1"));
-				rec1.add(rs2.getInt("r_ID"));
+				count2.add(rs2.getInt("u1"));
+				rec1.add(rs2.getInt("u_ID"));
+				//System.out.println(rs2.getInt("u1"));
+				//System.out.println(rs2.getInt("u_ID"));
 			}
-			
+			System.out.println();
 			PreparedStatement s3 = sql.prepareStatement(ins3);
 			s3.setDate(1, date);
 			ResultSet rs3 = s3.executeQuery();
 			while(rs3.next()){
 				count3.add(rs3.getInt("r2"));
 				rec2.add(rs3.getInt("r_ID"));
+				//System.out.println(rs3.getInt("r2"));
+				//System.out.println(rs3.getInt("r_ID"));
 			}
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+		int flag2 = 0;
+		for (int j = 0; j < count2.size(); j++){
+			for (int m = 0; m < count3.size(); m++){
+				if (rec2.get(m) == rec1.get(j)){
+					count3.set(m, (count2.get(j) + count3.get(m)));
+					flag2 = 1;
+				}
+			}
+			if (flag2 == 0){
+				count3.add(count2.get(j));
+				rec2.add(rec1.get(j));
+			}
+			
+			flag2 = 0;
+		}
 		for (int i = 0; i < k; i++){
 			int max = 0;
 			int name = 0;
 			int flag = 0;
+			
 			int index = 0;
 			for (int j = 0; j < count1.size(); j++){
 				if (count1.get(j) > max){
@@ -964,6 +971,7 @@ public static int searchForUser(String st, Connection sql){
 					index = j;
 				}
 			}
+			/*
 			for (int j = 0; j < count2.size(); j++){
 				if (count2.get(j) > max){
 					max = count2.get(j);
@@ -972,6 +980,7 @@ public static int searchForUser(String st, Connection sql){
 					index = j;
 				}
 			}
+			*/
 			for (int j = 0; j < count3.size(); j++){
 				if (count3.get(j) > max){
 					max = count3.get(j);
