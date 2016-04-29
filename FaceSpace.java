@@ -849,7 +849,7 @@ public static int displayNewMessages(int user, Connection sql){
     String ins2 = "";
     ArrayList<Timestamp> ar = new ArrayList<Timestamp>();
     try {
-    	s = sql.prepareStatement(ins);
+    	PreparedStatement s = sql.prepareStatement(ins);
         s.setInt(1, user);
         ResultSet rs = s.executeQuery();
         while(rs.next()){
@@ -881,7 +881,7 @@ public static int displayNewMessages(int user, Connection sql){
     ArrayList<Timestamp> ar2 = new ArrayList<Timestamp>();
 
     try {
-    	s = sql.prepareStatement(ins);
+    	PreparedStatement s = sql.prepareStatement(ins);
         s.setInt(1, user);
         ResultSet rs = s.executeQuery();
         while(rs.next()){
